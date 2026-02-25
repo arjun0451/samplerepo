@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: nginx
-          image: registry.redhat.io/ubi8/nginx-124@sha256:9f6c14ee78e4d9229f0b91464890ebc6b381a0fbd942d92fa2fc339330b07c33
+          image: quay.io/redhattraining/hello-world-nginx:latest
           ports:
             - containerPort: 8080
           envFrom:
