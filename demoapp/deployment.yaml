@@ -15,9 +15,9 @@ spec:
     spec:
       containers:
         - name: nginx
-          image: nginx:1.25
+          image: registry.redhat.io/ubi8/nginx-124@sha256:9f6c14ee78e4d9229f0b91464890ebc6b381a0fbd942d92fa2fc339330b07c33
           ports:
-            - containerPort: 80
+            - containerPort: 8080
           envFrom:
             - configMapRef:
                 name: demo-config
