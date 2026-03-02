@@ -1,0 +1,82 @@
+pipeline {
+  agent {
+    kubernetes {
+      label 'node-build-agent'
+      yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: buildah
+    image: quay.io/buildah/stable:latest
+    command:
+    - cat
+    tty: true
+    securityContext:
+      privileged: true
+"""
+    }
+  }
+
+  environment {
+    REGISTRY = "quay.io"
+    IMAGE_REPO = "quay.io/arjun0451/bck-04-nodejs"
+    IMAGE_TAG = "${env.BUILD_NUMBER}"
+  }
+
+  stages {
+
+    stage('Checkout') {
+      steps {
+        container('buildah') {
+          git url: 'https://github.com/arjun0451/samplerepo.git'
+        }
+      }
+    }
+
+    stage('Build Image') {
+      steps {
+        container('buildah') {
+          sh '''
+            buildah bud -f Containerfile -t $IMAGE_REPO:$IMAGE_TAG .
+          '''
+        }
+      }
+    }
+
+    stage('Login to Quay') {
+      steps {
+        container('buildah') {
+          withCredentials([usernamePassword(
+            credentialsId: 'quay-cred',
+            usernameVariable: 'QUAY_USER',
+            passwordVariable: 'QUAY_PASS'
+          )]) {
+            sh '''
+              buildah login -u $QUAY_USER -p $QUAY_PASS $REGISTRY
+            '''
+          }
+        }
+      }
+    }
+
+    stage('Push Image') {
+      steps {
+        container('buildah') {
+          sh '''
+            buildah push $IMAGE_REPO:$IMAGE_TAG
+          '''
+        }
+      }
+    }
+  }
+
+  post {
+    success {
+      echo "✅ Image pushed: $IMAGE_REPO:$IMAGE_TAG"
+    }
+    failure {
+      echo "❌ Build failed"
+    }
+  }
+}
