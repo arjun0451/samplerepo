@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: quay.io/arjun0451/backup/bck04-app:replacetag
+          image: quay.io/arjun0451/backup/bck-04-nodejs:16
           ports:
             - containerPort: 8080
           volumeMounts:
