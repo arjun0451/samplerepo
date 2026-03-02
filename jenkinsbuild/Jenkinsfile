@@ -1,14 +1,14 @@
 pipeline {
   agent {
     kubernetes {
-      label 'node-build-agent'
+      label 'podman-agent'
       yaml """
 apiVersion: v1
 kind: Pod
 spec:
   containers:
-  - name: buildah
-    image: quay.io/buildah/stable:latest
+  - name: podman
+    image: quay.io/podman/stable:latest
     command:
     - cat
     tty: true
@@ -19,52 +19,53 @@ spec:
   }
 
   environment {
-    REGISTRY = "quay.io"
-    IMAGE_REPO = "quay.io/arjun0451/bck-04-nodejs"
-    IMAGE_TAG = "${env.BUILD_NUMBER}"
+    REGISTRY   = "quay.io"
+    IMAGE_REPO = "quay.io/<your-quay-username>/bck-04-nodejs"
+    IMAGE_TAG  = "${env.BUILD_NUMBER}"
   }
 
   stages {
 
-    stage('Checkout') {
+    stage('Checkout jenkinsbuild branch') {
       steps {
-        container('buildah') {
-          git url: 'https://github.com/arjun0451/samplerepo.git'
-        }
-      }
-    }
-
-    stage('Build Image') {
-      steps {
-        container('buildah') {
-          sh '''
-            buildah bud -f Containerfile -t $IMAGE_REPO:$IMAGE_TAG .
-          '''
+        container('podman') {
+          git branch: 'jenkinsbuild',
+              url: 'https://github.com/arjun0451/samplerepo.git'
         }
       }
     }
 
     stage('Login to Quay') {
       steps {
-        container('buildah') {
+        container('podman') {
           withCredentials([usernamePassword(
             credentialsId: 'quay-cred',
             usernameVariable: 'QUAY_USER',
             passwordVariable: 'QUAY_PASS'
           )]) {
             sh '''
-              buildah login -u $QUAY_USER -p $QUAY_PASS $REGISTRY
+              podman login -u $QUAY_USER -p $QUAY_PASS $REGISTRY
             '''
           }
         }
       }
     }
 
+    stage('Build Image') {
+      steps {
+        container('podman') {
+          sh '''
+            podman build -f Containerfile -t $IMAGE_REPO:$IMAGE_TAG .
+          '''
+        }
+      }
+    }
+
     stage('Push Image') {
       steps {
-        container('buildah') {
+        container('podman') {
           sh '''
-            buildah push $IMAGE_REPO:$IMAGE_TAG
+            podman push $IMAGE_REPO:$IMAGE_TAG
           '''
         }
       }
