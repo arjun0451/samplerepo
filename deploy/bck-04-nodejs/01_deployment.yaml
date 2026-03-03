@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: quay.io/arjun0451/backup/bck-04-nodejs:1
+          image: quay.io/arjun0451/backup/bck-04-nodejs:24
           ports:
             - containerPort: 8080
           volumeMounts:
@@ -23,7 +23,7 @@ spec:
       volumes:
         - name: rwx-storage
           persistentVolumeClaim:
-            claimName: bck04-rwx-pvc-1
+            claimName: bck04-rwx-pvc
 ---
 apiVersion: v1
 kind: Service
