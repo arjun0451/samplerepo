@@ -8,11 +8,11 @@ WORKDIR /app
 USER 0
 
 # Copy package files and install dependencies
-COPY package*.json ./
+COPY src/package*.json ./
 RUN npm install --production
 
 # Copy app source
-COPY server.js .
+COPY src/server.js .
 
 # Fix permissions for non-root user
 RUN chown -R 1001:0 /app
