@@ -23,7 +23,7 @@ spec:
       volumes:
         - name: rwx-storage
           persistentVolumeClaim:
-            claimName: bck04-rwx-pvc
+            claimName: bck04-rwx-pvc-1
 ---
 apiVersion: v1
 kind: Service
